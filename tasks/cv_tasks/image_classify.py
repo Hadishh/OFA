@@ -11,7 +11,7 @@ import math
 import pickle
 from typing import Optional
 from data.file_dataset import FileDataset
-
+import pandas as pd
 import torch
 from fairseq import metrics
 from fairseq.tasks import register_task
@@ -64,8 +64,9 @@ class ImageClassifyTask(OFATask):
             table_path = paths[(epoch - 1) % (len(paths) - 1)]
         else:
             table_path = paths[-1]
-        dataset = FileDataset(table_path, self.cfg.selected_cols)
-
+        # print("THE TABLE PATH IS: ", table_path)
+        dataset = FileDataset(table_path, self.cfg.selected_cols, separator=',')
+        print(dataset[0])
         self.datasets[split] = ImageClassifyDataset(
             split,
             dataset,

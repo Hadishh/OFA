@@ -6,6 +6,7 @@
 from io import BytesIO
 
 import logging
+import os
 import warnings
 import functools
 
@@ -113,15 +114,12 @@ class ImageClassifyDataset(OFADataset):
         self.max_src_length = max_src_length
         self.max_tgt_length = max_tgt_length
         self.patch_image_size = patch_image_size
-
+        self.base_images_dir = "/cfs/home/u121233/frame_extraction/FCVID_Frames_4"
         self.constraint_trie = constraint_trie
 
-        if imagenet_default_mean_and_std:
-            mean = IMAGENET_DEFAULT_MEAN
-            std = IMAGENET_DEFAULT_STD
-        else:
-            mean = [0.5, 0.5, 0.5]
-            std = [0.5, 0.5, 0.5]
+        
+        mean = [0.42862814, 0.3991647, 0.36999809]
+        std = [0.28509079, 0.27949879, 0.28292171]
 
         if self.split != 'train':
             self.patch_resize_transform = transforms.Compose([
@@ -155,8 +153,9 @@ class ImageClassifyDataset(OFADataset):
 
     def __getitem__(self, index):
         image, label_name = self.dataset[index]
-
-        image = Image.open(BytesIO(base64.urlsafe_b64decode(image)))
+        image = os.path.join(self.base_images_dir, image)
+        label_name = str(label_name)
+        image = Image.open(image)
         patch_image = self.patch_resize_transform(image)
         patch_mask = torch.tensor([True])
 
