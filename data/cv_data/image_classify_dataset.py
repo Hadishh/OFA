@@ -75,7 +75,7 @@ def collate(samples, pad_idx, eos_idx):
             prev_output_tokens = merge("prev_output_tokens")
     else:
         ntokens = src_lengths.sum().item()
-
+    images_path = [sample["image_path"] for sample in samples]
     batch = {
         "id": id,
         "nsentences": len(samples),
@@ -91,6 +91,7 @@ def collate(samples, pad_idx, eos_idx):
         "ref_dict": ref_dict,
         "constraint_masks": constraint_masks,
         "target": target,
+        "images_path": images_path
     }
 
     return batch
@@ -152,10 +153,9 @@ class ImageClassifyDataset(OFADataset):
             logger.info("train split, use random augmentation.")
 
     def __getitem__(self, index):
-        image, label_name = self.dataset[index]
-        image = os.path.join(self.base_images_dir, image)
+        image_path, label_name = self.dataset[index]
         label_name = str(label_name)
-        image = Image.open(image)
+        image = Image.open(os.path.join(self.base_images_dir, image_path))
         patch_image = self.patch_resize_transform(image)
         patch_mask = torch.tensor([True])
 
@@ -175,6 +175,7 @@ class ImageClassifyDataset(OFADataset):
             "target": target_item,
             "prev_output_tokens": prev_output_item,
             "ref_dict": ref_dict,
+            "image_path" : image_path
         }
         if self.constraint_trie is not None:
             constraint_mask = torch.zeros((len(prev_output_item), len(self.tgt_dict))).bool()

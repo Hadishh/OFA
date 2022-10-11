@@ -290,8 +290,11 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
         scores = scores.masked_fill(valid_tgt.eq(task.tgt_dict.pad()), 0)
         scores = scores.sum(1)
         scores = scores.view(-1, valid_tgt_size)
+        
         valid_result.append(scores)
     valid_result = torch.cat(valid_result, dim=-1)
+    print(valid_result.shape)
+    print(sample['images_path'])
     predicts = valid_result.argmax(1).tolist()
     hyps = [task.index2ans[predict_index] for predict_index in predicts]
     scores = [ref_dict.get(hyp, 0) for ref_dict, hyp in zip(sample['ref_dict'], hyps)]

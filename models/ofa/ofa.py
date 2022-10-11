@@ -119,7 +119,6 @@ class OFAModel(TransformerModel):
                 # for torch script only supports iteration
                 if k == classification_head_name:
                     x = head(sentence_representation)
-                    print(sentence_representation.shape)
                     break
 
         return x, extra
