@@ -1558,10 +1558,8 @@ class TransformerDecoder(FairseqIncrementalDecoder):
 
         # T x B x C -> B x T x C
         x = x.transpose(0, 1)
-        print(f"X size is: {x.size()}")
         if self.project_out_dim is not None:
             x = self.project_out_dim(x)
-        print(f"X2 size is: {x.size()}")
         
 
         return x, {"attn": [attn], "inner_states": inner_states}

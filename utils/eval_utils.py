@@ -290,8 +290,17 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
     valid_result = valid_result.view(batch_size, -1)
     print(valid_result.shape)
     print(sample['images_path'])
+    prefix = "/cfs/home/u121233/FCVID_4_OFA_feats"
+    
+    for i in range(batch_size):
+        dir, file = os.path.split(sample['images_path'][i])
+        os.makedirs(os.path.join(prefix, dir), exist_ok=True)
+        file = file[:-2] + 't'
+        file = os.path.join(prefix, dir, file)
+        torch.save(valid_result[i:i+1], file)
+    
     predicts = valid_result.argmax(1).tolist()
-    hyps = [task.index2ans[predict_index] for predict_index in predicts]
+    hyps = [task.index2ans[0] for predict_index in predicts]
     scores = [ref_dict.get(hyp, 0) for ref_dict, hyp in zip(sample['ref_dict'], hyps)]
     results = [{"uniq_id": id, "answer": hyp} for id, hyp in zip(sample["id"].tolist(), hyps)]
     return results, scores
