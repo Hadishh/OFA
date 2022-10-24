@@ -284,15 +284,10 @@ def eval_image_classify(task, generator, models, sample, **kwargs):
         ]
 
         decoder_out = models[0].decoder(valid_prev_output, encoder_out=new_encoder_out)
-        decoder_out[0].masked_fill_(~valid_constraint_masks, -math.inf)
-        lprobs = models[0].get_normalized_probs(decoder_out, log_probs=True)
-        scores = lprobs.gather(dim=-1, index=valid_tgt.unsqueeze(-1)).squeeze(-1)
-        scores = scores.masked_fill(valid_tgt.eq(task.tgt_dict.pad()), 0)
-        scores = scores.sum(1)
-        scores = scores.view(-1, valid_tgt_size)
         
-        valid_result.append(scores)
-    valid_result = torch.cat(valid_result, dim=-1)
+        valid_result.append(decoder_out[0])
+    valid_result = torch.cat(valid_result, dim=0)
+    valid_result = valid_result.view(batch_size, -1)
     print(valid_result.shape)
     print(sample['images_path'])
     predicts = valid_result.argmax(1).tolist()
